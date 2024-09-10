@@ -498,7 +498,12 @@ bool renode_bridge::target_fw_handler::get_direct_mem_ptr(
 
 unsigned int renode_bridge::target_fw_handler::transport_dbg(
     tlm::tlm_generic_payload &trans) {
+
+  // the SystemC sim can begin when the SystemCExecutablePath method
+  // is invoked for the SystemC model, at which point the renode sim
+  // has not yet started.  reject any transactions during this interval
   if (!bridge->is_initialized()) return 0;
+
   sc_core::sc_time delay = sc_core::SC_ZERO_TIME;
   bridge->service_backward_request(trans, connection_idx, delay);
   return trans.is_response_ok() ? trans.get_data_length() : 0;
